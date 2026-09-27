@@ -105,7 +105,7 @@
         if (data.success) {
           appendLog(
             data.guestName,
-            data.guestId,
+            data.invitationType,
             "✅ Checked in",
             new Date(data.checkInTime).toLocaleString()
           );
@@ -115,7 +115,7 @@
             data.guestName,
             data.guestId || "",
             "Already checked in",
-            new Date().toLocaleString()
+            new Date(data.checkInTime).toLocaleString()
           );
         }
       })

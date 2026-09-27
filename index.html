@@ -1,1 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Check-In</title>
+  
+  <!-- Include the HTML5 QR Code scanning library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  
+  <!-- Basic styling for the page layout -->
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #reader { width: 300px; margin: 0 auto; }
+    #result { margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+    .success { color: green; }
+    .error { color: red; }
+    #log { margin-top: 40px; text-align: left; max-width: 700px; margin-left: auto; margin-right: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
 
+<body>
+  <!-- Main title -->
+  <h2>Wedding Check-In</h2>
+  
+  <!-- QR code scanner container -->
+  <div id="reader"></div>
+  
+  <!-- Dynamic text area for showing scan results -->
+  <div id="result">Scan a QR code to check in</div>
+  
+   <!-- Check-in log section -->
+  <div id="log">
+    <h3>Check-in Log</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Pass Type</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="log-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Reference to the table body where check-in records will be displayed
+    const tbody = document.getElementById("log-body");
+
+    /**
+     * Appends or updates a check-in record in the table log.
+     * @param {string} name - The attendee's name.
+     * @param {string} passType - The type of pass the attendee holds.
+     * @param {string} status - Check-in status (e.g., "✅ Checked in").
+     * @param {string} time - The timestamp of the check-in.
+     */
+    function appendLog(name, passType, status, time) {
+      // Prevent duplicates: check if row already exists
+      const existingRow = Array.from(tbody.rows).find(
+        row => row.cells[0].textContent.trim().toLowerCase() === name.trim().toLowerCase()
+      );
+
+      if (existingRow) {
+        // Update the existing record
+        existingRow.cells[1].textContent = passType;
+        existingRow.cells[2].textContent = status;
+        existingRow.cells[3].textContent = time;
+      } else {
+        // Create a new record for the attendee
+        const row = tbody.insertRow();
+        row.insertCell(0).textContent = name;
+        row.insertCell(1).textContent = passType;
+        row.insertCell(2).textContent = status;
+        row.insertCell(3).textContent = time;
+      }
+    }
+
+    /**
+     * Sends the scanned attendee name to the backend (Google Apps Script)
+     * and updates the UI based on the response.
+     * @param {string} name - The scanned QR content (attendee name).
+     */
+    function processScannedName(name) {
+      const payload = new URLSearchParams();
+      payload.append("name", name);
+
+      // Replace this with your deployed Apps Script web app URL
+      fetch("your script id eg: https://script.google.com/macros/s/...", {
+        method: "POST",
+        body: payload
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Backend response:", data); // Debugging line
+        const resultDiv = document.getElementById("result");
+        resultDiv.textContent = data.message;
+        resultDiv.className = data.success ? "success" : "error";
+
+        // If successful, log the check-in
+        if (data.success) {
+          appendLog(
+            data.name,
+            data.passType,
+            "✅ Checked in",
+            new Date(data.time).toLocaleString()
+          );
+        } else if (data.name) {
+          // If already checked in, still update the log with correct info
+          appendLog(
+            data.name,
+            data.passType || "",
+            "Already checked in",
+            new Date().toLocaleString()
+          );
+        }
+      })
+      .catch(err => {
+        // Display any network or backend errors
+        document.getElementById("result").textContent = "⚠️ Error: " + err;
+        document.getElementById("result").className = "error";
+      });
+    }
+
+    // Initialize the QR code scanner
+    const html5QrCode = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: 250 };
+
+     /**
+     * Starts the QR code scanner and listens for successful scans.
+     * When a QR code is detected, the camera stops temporarily,
+     * the name is processed, and scanning restarts after 3 seconds.
+     */
+    function startScanner() {
+      html5QrCode.start(
+        { facingMode: "environment" }, // Use the rear camera if available
+        config,
+        (decodedText) => {
+          // Stop scanning when a QR code is successfully read
+          html5QrCode.stop().then(() => {
+            // Process the scanned name (send to backend)
+            processScannedName(decodedText);
+            // Restart the scanner after a short delay (3 seconds)
+            setTimeout(startScanner, 3000);
+          });
+        },
+        (errorMessage) => { /* ignore scan errors */ }
+      ).catch(err => {
+        document.getElementById("result").textContent = "Camera error: " + err;
+      });
+    }
+
+    // Automatically start scanning when the page loads
+    startScanner();
+  </script>
+</body>

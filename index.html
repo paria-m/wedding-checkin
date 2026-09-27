@@ -39,7 +39,7 @@
       <thead>
         <tr>
           <th>Name</th>
-          <th>Pass Type</th>
+          <th>Invitation Type</th>
           <th>Status</th>
           <th>Time</th>
         </tr>
@@ -85,12 +85,12 @@
      * and updates the UI based on the response.
      * @param {string} name - The scanned QR content (attendee name).
      */
-    function processScannedName(name) {
+    function processScannedToken(token) {
       const payload = new URLSearchParams();
-      payload.append("name", name);
+      payload.append("token", token);
 
       // Replace this with your deployed Apps Script web app URL
-      fetch("your script id eg: https://script.google.com/macros/s/...", {
+      fetch("https://script.google.com/macros/s/AKfycbxO8VqIPXFnSbVt_MGBiAagkc-AcqRPATZ1UfLyNi4-HIn50P8WgxgxzY6jM3PpLF8k9g/exec", {
         method: "POST",
         body: payload
       })
@@ -104,16 +104,16 @@
         // If successful, log the check-in
         if (data.success) {
           appendLog(
-            data.name,
-            data.passType,
+            data.guestName,
+            data.guestId,
             "✅ Checked in",
-            new Date(data.time).toLocaleString()
+            new Date(data.checkInTime).toLocaleString()
           );
-        } else if (data.name) {
+        } else if (data.guestName) {
           // If already checked in, still update the log with correct info
           appendLog(
-            data.name,
-            data.passType || "",
+            data.guestName,
+            data.guestId || "",
             "Already checked in",
             new Date().toLocaleString()
           );

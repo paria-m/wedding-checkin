@@ -13,6 +13,7 @@
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     #reader { width: 300px; margin: 0 auto; }
     #result { margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+    #guest-count { margin: 16px auto; padding: 14px; max-width: 420px; border: 1px solid #ddd; border-radius: 10px; font-size: 1.15em; font-weight: bold; background-color: #f8fafc; } 
     .success { color: green; }
     .error { color: red; }
     #log { margin-top: 40px; text-align: left; max-width: 700px; margin-left: auto; margin-right: auto; }
@@ -56,6 +57,65 @@
     // Reference to the table body where check-in records will be displayed
     const tbody = document.getElementById("log-body");
 
+    // The Google Apps Script Web App URL.
+const backendUrl =
+  "https://script.google.com/macros/s/AKfycbxO8VqIPXFnSbVt_MGBiAagkc-AcqRPATZ1UfLyNi4-HIn50P8WgxgxzY6jM3PpLF8k9g/exec";
+
+// Display the count on the webpage.
+function updateGuestCount(count) {
+
+  const countElement = document.getElementById("guest-count");
+
+  countElement.textContent =
+    "Unique QR codes checked in: " + count;
+}
+
+
+// Ask the backend for the current count.
+function loadGuestCount() {
+
+  const payload = new URLSearchParams();
+
+  payload.append("action", "stats");
+
+  fetch(backendUrl, {
+    method: "POST",
+    body: payload
+  })
+
+  .then(res => res.json())
+
+  .then(data => {
+
+    if (
+      data.success &&
+      data.checkedInCount !== undefined &&
+      Number.isFinite(Number(data.checkedInCount))
+    ) {
+
+      updateGuestCount(Number(data.checkedInCount));
+
+    } else {
+
+      document.getElementById("guest-count").textContent =
+        "Unique QR codes checked in: unavailable";
+
+      console.error("Could not load guest count:", data);
+    }
+
+  })
+
+  .catch(error => {
+
+    document.getElementById("guest-count").textContent =
+      "Unique QR codes checked in: unavailable";
+
+    console.error("Error loading guest count:", error);
+
+  });
+
+}
+
     /**
      * Appends or updates a check-in record in the table log.
      * @param {string} name - The attendee's name.
@@ -94,13 +154,17 @@
       payload.append("token", token);
 
       // Replace this with your deployed Apps Script web app URL
-      fetch("https://script.google.com/macros/s/AKfycbxO8VqIPXFnSbVt_MGBiAagkc-AcqRPATZ1UfLyNi4-HIn50P8WgxgxzY6jM3PpLF8k9g/exec", {
+      fetch(backendUrl, {
         method: "POST",
         body: payload
       })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response:", data); // Debugging line
+        console.log("Backend response:", data);   // Debugging line
+
+           // Refresh the count from Google Sheets after every scan.
+       loadGuestCount();
+        
         const resultDiv = document.getElementById("result");
         resultDiv.textContent = data.message;
         resultDiv.className = data.success ? "success" : "error";
@@ -157,6 +221,9 @@
         document.getElementById("result").textContent = "Camera error: " + err;
       });
     }
+
+    // Load the current guest count from Google Sheets.
+    loadGuestCount();
 
     // Automatically start scanning when the page loads
     startScanner();

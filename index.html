@@ -164,55 +164,6 @@ function loadGuestCount() {
 
            // Refresh the count from Google Sheets after every scan.
        loadGuestCount();
-
-       loadCheckInHistory();
-
-        // Reload previous check-ins from Google Sheets.
-    function loadCheckInHistory() {
-    
-      const payload = new URLSearchParams();
-      payload.append("action", "history");
-    
-      fetch(backendUrl, {
-        method: "POST",
-        body: payload
-      })
-    
-      .then(res => res.json())
-    
-      .then(data => {
-    
-        if (!data.success || !Array.isArray(data.guests)) {
-          console.error("Could not load check-in history:", data);
-          return;
-        }
-    
-        // Clear the temporary browser table before restoring its records.
-        tbody.replaceChildren();
-    
-        // Restore each checked-in guest from Google Sheets.
-        data.guests.forEach(guest => {
-    
-          const time = guest.checkInTime
-            ? new Date(guest.checkInTime).toLocaleString()
-            : "";
-    
-          appendLog(
-            guest.guestName,
-            guest.invitationType || "",
-            "✅ Checked in",
-            time
-          );
-    
-        });
-    
-      })
-
-  .catch(error => {
-    console.error("Could not load check-in history:", error);
-  });
-
-}
         
         const resultDiv = document.getElementById("result");
         resultDiv.textContent = data.message;
@@ -273,8 +224,6 @@ function loadGuestCount() {
 
     // Load the current guest count from Google Sheets.
     loadGuestCount();
-
-    loadCheckInHistory();
 
     // Automatically start scanning when the page loads
     startScanner();

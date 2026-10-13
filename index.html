@@ -116,6 +116,48 @@ function loadGuestCount() {
 
 }
 
+
+function loadCheckInHistory() {
+  fetch(backendUrl + "?action=history")
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error(
+          "History request failed: HTTP " + response.status
+        );
+      }
+
+      return response.json();
+    })
+    .then(function (data) {
+      // Keep the existing table intact if history could not be loaded.
+      if (!data.success || !Array.isArray(data.guests)) {
+        console.error("Could not load check-in history:", data);
+        return;
+      }
+
+      // Replace the temporary table with saved check-in records.
+      tbody.replaceChildren();
+
+      data.guests.forEach(function (guest) {
+        const time = guest.checkInTime
+          ? new Date(guest.checkInTime).toLocaleString()
+          : "";
+
+        appendLog(
+          guest.guestName,
+          guest.invitationType || "",
+          "✅ Checked in",
+          time
+        );
+      });
+    })
+    .catch(function (error) {
+      // A history error must not stop the camera from starting.
+      console.error("Could not load check-in history:", error);
+    });
+}
+
+
     /**
      * Appends or updates a check-in record in the table log.
      * @param {string} name - The attendee's name.
@@ -224,6 +266,7 @@ function loadGuestCount() {
 
     // Load the current guest count from Google Sheets.
     loadGuestCount();
+    loadCheckInHistory();
 
     // Automatically start scanning when the page loads
     startScanner();

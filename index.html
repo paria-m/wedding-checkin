@@ -136,7 +136,7 @@ function loadCheckInHistory() {
       }
 
       // Replace the temporary table with saved check-in records.
-      tbody.replaceChildren();
+     // tbody.replaceChildren();
 
       data.guests.forEach(function (guest) {
         const time = guest.checkInTime
@@ -219,15 +219,18 @@ function loadCheckInHistory() {
             "✅ Checked in",
             new Date(data.checkInTime).toLocaleString()
           );
+        
         } else if (data.guestName) {
-          // If already checked in, still update the log with correct info
           appendLog(
             data.guestName,
-            data.guestId || "",
+            data.invitationType || "",
             "Already checked in",
-            new Date(data.checkInTime).toLocaleString()
+            data.checkInTime
+              ? new Date(data.checkInTime).toLocaleString()
+              : ""
           );
         }
+
       })
       .catch(err => {
         // Display any network or backend errors

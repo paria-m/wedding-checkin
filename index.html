@@ -69,7 +69,7 @@ function updateGuestCount(count) {
   const countElement = document.getElementById("guest-count");
 
   countElement.textContent =
-    "Unique QR codes checked in: " + count;
+    "مهمانان حاضر در مراسم: " + count;
 }
 
 
@@ -100,9 +100,9 @@ function loadGuestCount() {
     } else {
 
       document.getElementById("guest-count").textContent =
-        "Unique QR codes checked in: unavailable";
+        "مهمانان حاضر در مراسم: در دسترس نیست";
 
-      console.error("Could not load guest count:", data);
+      console.error("امکان نمایش تعداد مهمانان وجود ندارد: ", data);
     }
 
   })
@@ -110,9 +110,9 @@ function loadGuestCount() {
   .catch(error => {
 
     document.getElementById("guest-count").textContent =
-      "Unique QR codes checked in: unavailable";
+      "مهمانان حاضر در مراسم: در دسترس نیست";
 
-    console.error("Error loading guest count:", error);
+    console.error("خطا در بارگذاری تعداد مهمانان: ", error);
 
   });
 
@@ -133,7 +133,7 @@ function loadCheckInHistory() {
     .then(function (data) {
       // Keep the existing table intact if history could not be loaded.
       if (!data.success || !Array.isArray(data.guests)) {
-        console.error("Could not load check-in history:", data);
+        console.error("بارگذاری سوابق ورود ناموفق بود: ", data);
         return;
       }
 
@@ -155,7 +155,7 @@ function loadCheckInHistory() {
     })
     .catch(function (error) {
       // A history error must not stop the camera from starting.
-      console.error("Could not load check-in history:", error);
+      console.error("بارگذاری سوابق ورود ناموفق بود: ", error);
     });
 }
 
@@ -197,7 +197,7 @@ function loadCheckInHistory() {
       const payload = new URLSearchParams();
       payload.append("token", token);
 
-      // Replace this with your deployed Apps Script web app URL
+      // https://script.google.com/macros/s/AKfycbxO8VqIPXFnSbVt_MGBiAagkc-AcqRPATZ1UfLyNi4-HIn50P8WgxgxzY6jM3PpLF8k9g/exec
       fetch(backendUrl, {
         method: "POST",
         body: payload

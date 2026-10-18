@@ -27,10 +27,10 @@
 
 <body>
   <!-- Main title -->
-  <h2>Wedding Check-In</h2>
+  <h2>پذیرش مهمانان عروسی</h2>
 
   <div id="guest-count" aria-live="polite">
-  Unique QR codes checked in: loading...
+  مهمانان حاضر در مراسم: ...
 </div>
   
   <!-- QR code scanner container -->
@@ -45,10 +45,10 @@
     <table>
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Invitation Type</th>
-          <th>Status</th>
-          <th>Time</th>
+          <th>نام مهمان</th>
+          <th>نوع دعوت</th>
+          <th>وضعیت پذیرش</th>
+          <th>ساعت ورود</th>
         </tr>
       </thead>
       <tbody id="log-body"></tbody>
@@ -148,7 +148,7 @@ function loadCheckInHistory() {
         appendLog(
           guest.guestName,
           guest.invitationType || "",
-          "✅ ورود با موقیت ثبت شد",
+          "✅ ورود با موفقیت ثبت شد",
           time
         );
       });

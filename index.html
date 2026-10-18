@@ -27,7 +27,7 @@
 
 <body>
   <!-- Main title -->
-  <h2>پذیرش مهمانان عروسی</h2>
+  <h2>خوشآمد گویی به مهمانان عروسی</h2>
 
   <div id="guest-count" aria-live="polite">
   مهمانان حاضر در مراسم: ...
@@ -41,7 +41,7 @@
   
    <!-- Check-in log section -->
   <div id="log">
-    <h3>Check-in Log</h3>
+    <h3>فهرست ورود</h3>
     <table>
       <thead>
         <tr>
@@ -226,7 +226,7 @@ function loadCheckInHistory() {
           appendLog(
             data.guestName,
             data.invitationType || "",
-            "مهمان قبلا وارد شده ",
+            "ورود قبلا ثبت شده ",
             data.checkInTime
               ? new Date(data.checkInTime).toLocaleString()
               : ""

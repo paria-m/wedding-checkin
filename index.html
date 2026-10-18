@@ -148,7 +148,7 @@ function loadCheckInHistory() {
         appendLog(
           guest.guestName,
           guest.invitationType || "",
-          "✅ Checked in",
+          "✅ ورود با موقیت ثبت شد",
           time
         );
       });
@@ -218,7 +218,7 @@ function loadCheckInHistory() {
           appendLog(
             data.guestName,
             data.invitationType,
-            "✅ Checked in",
+            "✅ ورود ثبت شد",
             new Date(data.checkInTime).toLocaleString()
           );
         
@@ -226,7 +226,7 @@ function loadCheckInHistory() {
           appendLog(
             data.guestName,
             data.invitationType || "",
-            "قبلا وارد شده ",
+            "مهمان قبلا وارد شده ",
             data.checkInTime
               ? new Date(data.checkInTime).toLocaleString()
               : ""

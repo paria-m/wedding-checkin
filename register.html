@@ -1,16 +1,133 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wedding Guest Registration</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f7f4f0;
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      color: #7b3f54;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 7px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 13px;
+      border: none;
+      border-radius: 6px;
+      background: #7b3f54;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .note {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Wedding Guest Registration</h1>
+  <div class="container">
+    <h1>Wedding Guest Registration</h1>
 
-  <p>Register yourself and your family for the wedding.</p>
+    <p>
+      Please enter your details and the names of the family members
+      who will attend the wedding.
+    </p>
 
-  <p>This page is being prepared. Registration is not active yet.</p>
+    <form id="registrationForm">
+      <label for="contactName">Your full name</label>
+      <input
+        type="text"
+        id="contactName"
+        name="contactName"
+        autocomplete="name"
+        required
+      >
+
+      <label for="phone">Your phone number</label>
+      <input
+        type="tel"
+        id="phone"
+        name="phone"
+        autocomplete="tel"
+        placeholder="Enter your phone number"
+        required
+      >
+
+      <label for="familyMembers">
+        Names of family members attending
+      </label>
+      <textarea
+        id="familyMembers"
+        name="familyMembers"
+        placeholder="Enter one name per line. Include your own name only if you want to list everyone together."
+      ></textarea>
+
+      <p class="note">
+        Your registration will be reviewed by the wedding host.
+        QR codes will not be issued until your registration is approved.
+      </p>
+
+      <button type="submit">Submit Registration</button>
+    </form>
+
+    <p id="message" role="status" aria-live="polite"></p>
+  </div>
+
+  <script>
+    document
+      .getElementById("registrationForm")
+      .addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        document.getElementById("message").textContent =
+          "The registration form is ready, but saving registrations has not been connected yet.";
+      });
+  </script>
 </body>
 </html>
+

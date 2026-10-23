@@ -118,16 +118,66 @@
     <p id="message" role="status" aria-live="polite"></p>
   </div>
 
-  <script>
-    document
-      .getElementById("registrationForm")
-      .addEventListener("submit", function(event) {
-        event.preventDefault();
+  
+<script>
+  const SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbxO8VqIPXFnSbVt_MGBiAagkc-AcqRPATZ1UfLyNi4-HIn50P8WgxgxzY6jM3PpLF8k9g/exec";
 
-        document.getElementById("message").textContent =
-          "The registration form is ready, but saving registrations has not been connected yet.";
+  const form = document.getElementById("registrationForm");
+  const message = document.getElementById("message");
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  form.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    message.textContent = "Submitting your registration...";
+    submitButton.disabled = true;
+
+    const formData = new URLSearchParams();
+    formData.append("action", "register");
+    formData.append(
+      "contactName",
+      document.getElementById("contactName").value.trim()
+    );
+    formData.append(
+      "phone",
+      document.getElementById("phone").value.trim()
+    );
+    formData.append(
+      "familyMembers",
+      document.getElementById("familyMembers").value.trim()
+    );
+
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: formData
       });
-  </script>
+
+      const result = await response.json();
+
+      if (result.success) {
+        message.textContent =
+          "Registration received! Please wait for the host to approve it.";
+
+        form.reset();
+      } else {
+        message.textContent =
+          result.message || "Registration failed. Please try again.";
+      }
+
+    } catch (error) {
+      message.textContent =
+        "We could not confirm your submission. Please contact the host before trying again.";
+
+      console.error("Registration error:", error);
+
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+</script>
+
 </body>
 </html>
 

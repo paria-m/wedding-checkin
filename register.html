@@ -1,13 +1,21 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wedding Guest Registration</title>
+
+  <title>ثبت‌نام مهمانان مراسم</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: Tahoma, Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
       max-width: 600px;
       margin: 40px auto;
       padding: 20px;
@@ -25,6 +33,11 @@
     h1 {
       text-align: center;
       color: #7b3f54;
+      font-size: 25px;
+    }
+
+    p {
+      line-height: 1.9;
     }
 
     label {
@@ -35,13 +48,20 @@
 
     input,
     textarea {
-      box-sizing: border-box;
       width: 100%;
       padding: 12px;
       margin-top: 7px;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 16px;
+      font-family: inherit;
+      direction: rtl;
+      text-align: right;
+    }
+
+    input[type="tel"] {
+      direction: ltr;
+      text-align: left;
     }
 
     textarea {
@@ -58,28 +78,55 @@
       background: #7b3f54;
       color: white;
       font-size: 16px;
+      font-family: inherit;
       cursor: pointer;
+    }
+
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
     }
 
     .note {
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.9;
       color: #555;
+    }
+
+    #message {
+      margin-top: 18px;
+      text-align: center;
+      font-weight: bold;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        margin: 10px auto;
+        padding: 12px;
+      }
+
+      .container {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
+
   <div class="container">
-    <h1>Wedding Guest Registration</h1>
+
+    <h1>ثبت‌نام مهمانان مراسم</h1>
 
     <p>
-      Please enter your details and the names of the family members
-      who will attend the wedding.
+      لطفاً اطلاعات خود و نام اعضای خانواده‌ای را که در مراسم حضور خواهند داشت وارد کنید.
     </p>
 
     <form id="registrationForm">
-      <label for="contactName">Your full name</label>
+
+      <label for="contactName">نام و نام خانوادگی</label>
+
       <input
         type="text"
         id="contactName"
@@ -88,96 +135,118 @@
         required
       >
 
-      <label for="phone">Your phone number</label>
+      <label for="phone">شماره تلفن همراه</label>
+
       <input
         type="tel"
         id="phone"
         name="phone"
         autocomplete="tel"
-        placeholder="Enter your phone number"
+        placeholder="مثلاً 09123456789"
         required
       >
 
       <label for="familyMembers">
-        Names of family members attending
+        نام اعضای خانواده‌ای که در مراسم حضور دارند
       </label>
+
       <textarea
         id="familyMembers"
         name="familyMembers"
-        placeholder="Enter one name per line. Include your own name only if you want to list everyone together."
+        placeholder="نام هر نفر را در یک خط وارد کنید."
       ></textarea>
 
       <p class="note">
-        Your registration will be reviewed by the wedding host.
-        QR codes will not be issued until your registration is approved.
+        اطلاعات ثبت‌شده توسط میزبان مراسم بررسی خواهد شد.
+        پس از تأیید میزبان، کد QR برای شما صادر خواهد شد.
       </p>
 
-      <button type="submit">Submit Registration</button>
+      <button type="submit">
+        ارسال اطلاعات
+      </button>
+
     </form>
 
     <p id="message" role="status" aria-live="polite"></p>
+
   </div>
 
-  
-<script>
-  const SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbxO8VqIPXFnSbVt_MGBiAagkc-AcqRPATZ1UfLyNi4-HIn50P8WgxgxzY6jM3PpLF8k9g/exec";
+  <script>
 
-  const form = document.getElementById("registrationForm");
-  const message = document.getElementById("message");
-  const submitButton = form.querySelector('button[type="submit"]');
+    const SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbxO8VqIPXFnSbVt_MGBiAagkc-AcqRPATZ1UfLyNi4-HIn50P8WgxgxzY6jM3PpLF8k9g/exec";
 
-  form.addEventListener("submit", async function(event) {
-    event.preventDefault();
+    const form = document.getElementById("registrationForm");
+    const message = document.getElementById("message");
 
-    message.textContent = "Submitting your registration...";
-    submitButton.disabled = true;
+    const submitButton =
+      form.querySelector('button[type="submit"]');
 
-    const formData = new URLSearchParams();
-    formData.append("action", "register");
-    formData.append(
-      "contactName",
-      document.getElementById("contactName").value.trim()
-    );
-    formData.append(
-      "phone",
-      document.getElementById("phone").value.trim()
-    );
-    formData.append(
-      "familyMembers",
-      document.getElementById("familyMembers").value.trim()
-    );
+    form.addEventListener("submit", async function(event) {
 
-    try {
-      const response = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: formData
-      });
+      event.preventDefault();
 
-      const result = await response.json();
+      message.textContent = "در حال ارسال اطلاعات...";
+      submitButton.disabled = true;
 
-      if (result.success) {
+      const formData = new URLSearchParams();
+
+      formData.append("action", "register");
+
+      formData.append(
+        "contactName",
+        document.getElementById("contactName").value.trim()
+      );
+
+      formData.append(
+        "phone",
+        document.getElementById("phone").value.trim()
+      );
+
+      formData.append(
+        "familyMembers",
+        document.getElementById("familyMembers").value.trim()
+      );
+
+      try {
+
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+
+          message.textContent = result.message ||
+            "درخواست ثبت‌نام شما با موفقیت ارسال شد.";
+
+          form.reset();
+
+        } else {
+
+          message.textContent = result.message ||
+            "ثبت‌نام انجام نشد. لطفاً دوباره تلاش کنید.";
+
+        }
+
+      } catch (error) {
+
         message.textContent =
-          "Registration received! Please wait for the host to approve it.";
+          "ارتباط با سرور برقرار نشد. لطفاً قبل از تلاش مجدد با پشتیبانی تماس بگیرید.";
 
-        form.reset();
-      } else {
-        message.textContent =
-          result.message || "Registration failed. Please try again.";
+        console.error("Registration error:", error);
+
+      } finally {
+
+        submitButton.disabled = false;
+
       }
 
-    } catch (error) {
-      message.textContent =
-        "We could not confirm your submission. Please contact the host before trying again.";
+    });
 
-      console.error("Registration error:", error);
-
-    } finally {
-      submitButton.disabled = false;
-    }
-  });
-</script>
+  </script>
 
 </body>
 </html>
-

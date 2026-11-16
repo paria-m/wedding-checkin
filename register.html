@@ -305,16 +305,19 @@
           phone: phone
         });
 
-        if (result.success) {
+       if (result.success) {
 
           phoneSection.classList.add("hidden");
           otpSection.classList.remove("hidden");
-
+        
           otpInput.value = "";
-
+        
+          verifyOtpButton.disabled = false;
+          resendOtpButton.disabled = false;
+        
           message.textContent =
             result.message || "کد تأیید ارسال شد. لطفاً آن را وارد کنید.";
-
+        
           otpInput.focus();
 
         } else {

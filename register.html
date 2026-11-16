@@ -59,7 +59,8 @@
       text-align: right;
     }
 
-    input[type="tel"] {
+    input[type="tel"],
+    input.otp-input {
       direction: ltr;
       text-align: left;
     }
@@ -87,6 +88,11 @@
       cursor: not-allowed;
     }
 
+    button.secondary {
+      background: #777;
+      margin-top: 10px;
+    }
+
     .note {
       font-size: 14px;
       line-height: 1.9;
@@ -98,6 +104,14 @@
       text-align: center;
       font-weight: bold;
       line-height: 1.8;
+    }
+
+    .step {
+      margin-top: 22px;
+    }
+
+    .hidden {
+      display: none;
     }
 
     @media (max-width: 480px) {
@@ -120,52 +134,108 @@
     <h1>ثبت‌نام مهمانان مراسم</h1>
 
     <p>
-      لطفاً اطلاعات خود و نام اعضای خانواده‌ای را که در مراسم حضور خواهند داشت وارد کنید.
+      برای ثبت‌نام، ابتدا شماره تلفن همراه خود را تأیید کنید.
+      سپس می‌توانید اطلاعات خود و اعضای خانواده را وارد کنید.
     </p>
 
-    <form id="registrationForm">
+    <!-- STEP 1: PHONE NUMBER -->
 
-      <label for="contactName">نام و نام خانوادگی</label>
-
-      <input
-        type="text"
-        id="contactName"
-        name="contactName"
-        autocomplete="name"
-        required
-      >
+    <div id="phoneSection" class="step">
 
       <label for="phone">شماره تلفن همراه</label>
 
       <input
         type="tel"
         id="phone"
-        name="phone"
         autocomplete="tel"
         placeholder="مثلاً 09123456789"
         required
       >
 
-      <label for="familyMembers">
-        نام اعضای خانواده‌ای که در مراسم حضور دارند
-      </label>
-
-      <textarea
-        id="familyMembers"
-        name="familyMembers"
-        placeholder="نام هر نفر را در یک خط وارد کنید."
-      ></textarea>
-
-      <p class="note">
-        اطلاعات ثبت‌شده توسط پشتیبان مراسم بررسی خواهد شد.
-        پس از تأیید پشتیبانی، کد QR برای شما صادر خواهد شد.
-      </p>
-
-      <button type="submit">
-        ارسال اطلاعات
+      <button type="button" id="sendOtpButton">
+        دریافت کد تأیید
       </button>
 
-    </form>
+    </div>
+
+    <!-- STEP 2: OTP VERIFICATION -->
+
+    <div id="otpSection" class="step hidden">
+
+      <p>
+        کد تأیید برای شماره موبایل شما ارسال شده است.
+        لطفاً کد شش‌رقمی را وارد کنید.
+      </p>
+
+      <label for="otp">کد تأیید</label>
+
+      <input
+        type="text"
+        id="otp"
+        class="otp-input"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="6"
+        placeholder="کد شش‌رقمی"
+      >
+
+      <button type="button" id="verifyOtpButton">
+        تأیید کد
+      </button>
+
+      <button type="button" id="resendOtpButton" class="secondary">
+        ارسال مجدد کد
+      </button>
+
+      <button type="button" id="changePhoneButton" class="secondary">
+        تغییر شماره موبایل
+      </button>
+
+    </div>
+
+    <!-- STEP 3: REGISTRATION DETAILS -->
+
+    <div id="detailsSection" class="step hidden">
+
+      <p>
+        <strong>شماره موبایل شما با موفقیت تأیید شد.</strong>
+        اکنون اطلاعات ثبت‌نام را وارد کنید.
+      </p>
+
+      <form id="registrationForm">
+
+        <label for="contactName">نام و نام خانوادگی</label>
+
+        <input
+          type="text"
+          id="contactName"
+          name="contactName"
+          autocomplete="name"
+          required
+        >
+
+        <label for="familyMembers">
+          نام اعضای خانواده‌ای که در مراسم حضور دارند
+        </label>
+
+        <textarea
+          id="familyMembers"
+          name="familyMembers"
+          placeholder="نام هر نفر را در یک خط وارد کنید."
+        ></textarea>
+
+        <p class="note">
+          اطلاعات ثبت‌شده توسط پشتیبان مراسم بررسی خواهد شد.
+          پس از تأیید پشتیبانی، کد QR برای شما صادر خواهد شد.
+        </p>
+
+        <button type="submit" id="submitButton">
+          ارسال اطلاعات ثبت‌نام
+        </button>
+
+      </form>
+
+    </div>
 
     <p id="message" role="status" aria-live="polite"></p>
 
@@ -174,60 +244,245 @@
   <script>
 
     const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxABUJIOwW3obUMnTfzoWzFlX9JslMLwZIrt15MqYABxDisIRN1WEwYpIkiCH4V-Vlo/exec";
+      "https://script.google.com/macros/s/AKfycbxABUJIOwW3obUMnTfzoWzFlX9JslMLwZIrt15MqYABxDisIRN1WEwYpIkiCH4V-Vlo/exec";
 
-    const form = document.getElementById("registrationForm");
+    const phoneInput = document.getElementById("phone");
+    const otpInput = document.getElementById("otp");
+
+    const phoneSection = document.getElementById("phoneSection");
+    const otpSection = document.getElementById("otpSection");
+    const detailsSection = document.getElementById("detailsSection");
+
+    const sendOtpButton = document.getElementById("sendOtpButton");
+    const verifyOtpButton = document.getElementById("verifyOtpButton");
+    const resendOtpButton = document.getElementById("resendOtpButton");
+    const changePhoneButton = document.getElementById("changePhoneButton");
+
+    const registrationForm = document.getElementById("registrationForm");
+    const submitButton = document.getElementById("submitButton");
+
     const message = document.getElementById("message");
 
-    const submitButton =
-      form.querySelector('button[type="submit"]');
+    // This token exists only in the current page session.
+    let verificationToken = "";
 
-    form.addEventListener("submit", async function(event) {
-
-      event.preventDefault();
-
-      message.textContent = "در حال ارسال اطلاعات...";
-      submitButton.disabled = true;
+    // Send a request to Google Apps Script.
+    async function sendRequest(data) {
 
       const formData = new URLSearchParams();
 
-      formData.append("action", "register");
+      Object.keys(data).forEach(function(key) {
+        formData.append(key, data[key]);
+      });
 
-      formData.append(
-        "contactName",
-        document.getElementById("contactName").value.trim()
-      );
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: formData
+      });
 
-      formData.append(
-        "phone",
-        document.getElementById("phone").value.trim()
-      );
+      return await response.json();
+    }
 
-      formData.append(
-        "familyMembers",
-        document.getElementById("familyMembers").value.trim()
-      );
+    // STEP 1: Send OTP.
+    async function sendOtp() {
+
+      const phone = phoneInput.value.trim();
+
+      if (!phone) {
+        message.textContent = "لطفاً شماره موبایل خود را وارد کنید.";
+        return;
+      }
+
+      sendOtpButton.disabled = true;
+      resendOtpButton.disabled = true;
+
+      message.textContent = "در حال ارسال کد تأیید...";
 
       try {
 
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: formData
+        const result = await sendRequest({
+          action: "sendOtp",
+          phone: phone
         });
-
-        const result = await response.json();
 
         if (result.success) {
 
-          message.textContent = result.message ||
-            "درخواست ثبت‌نام شما با موفقیت ارسال شد.";
+          phoneSection.classList.add("hidden");
+          otpSection.classList.remove("hidden");
 
-          form.reset();
+          otpInput.value = "";
+
+          message.textContent =
+            result.message || "کد تأیید ارسال شد. لطفاً آن را وارد کنید.";
+
+          otpInput.focus();
 
         } else {
 
-          message.textContent = result.message ||
-            "ثبت‌نام انجام نشد. لطفاً دوباره تلاش کنید.";
+          message.textContent =
+            result.message || "ارسال کد تأیید انجام نشد.";
+
+          sendOtpButton.disabled = false;
+          resendOtpButton.disabled = false;
+
+        }
+
+      } catch (error) {
+
+        message.textContent =
+          "ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.";
+
+        console.error("Send OTP error:", error);
+
+        sendOtpButton.disabled = false;
+        resendOtpButton.disabled = false;
+
+      }
+
+    }
+
+    // STEP 2: Verify OTP.
+    async function verifyOtp() {
+
+      const phone = phoneInput.value.trim();
+      const otp = otpInput.value.trim();
+
+      if (!/^[0-9]{6}$/.test(otp)) {
+        message.textContent =
+          "لطفاً کد تأیید شش‌رقمی را با اعداد انگلیسی وارد کنید.";
+        return;
+      }
+
+      verifyOtpButton.disabled = true;
+
+      message.textContent = "در حال بررسی کد تأیید...";
+
+      try {
+
+        const result = await sendRequest({
+          action: "verifyOtp",
+          phone: phone,
+          otp: otp
+        });
+
+        if (result.success && result.verificationToken) {
+
+          verificationToken = result.verificationToken;
+
+          otpSection.classList.add("hidden");
+          detailsSection.classList.remove("hidden");
+
+          message.textContent =
+            "شماره موبایل شما با موفقیت تأیید شد.";
+
+        } else {
+
+          message.textContent =
+            result.message || "کد تأیید صحیح نیست.";
+
+          verifyOtpButton.disabled = false;
+
+        }
+
+      } catch (error) {
+
+        message.textContent =
+          "ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.";
+
+        console.error("Verify OTP error:", error);
+
+        verifyOtpButton.disabled = false;
+
+      }
+
+    }
+
+    // Resend OTP.
+    sendOtpButton.addEventListener("click", sendOtp);
+    resendOtpButton.addEventListener("click", sendOtp);
+
+    // Verify OTP.
+    verifyOtpButton.addEventListener("click", verifyOtp);
+
+    // Change phone number.
+    changePhoneButton.addEventListener("click", function() {
+
+      verificationToken = "";
+
+      phoneInput.value = "";
+      otpInput.value = "";
+
+      phoneSection.classList.remove("hidden");
+      otpSection.classList.add("hidden");
+      detailsSection.classList.add("hidden");
+
+      sendOtpButton.disabled = false;
+      resendOtpButton.disabled = false;
+      verifyOtpButton.disabled = false;
+
+      message.textContent = "";
+
+      phoneInput.focus();
+
+    });
+
+    // STEP 3: Submit final registration.
+    registrationForm.addEventListener("submit", async function(event) {
+
+      event.preventDefault();
+
+      if (!verificationToken) {
+
+        message.textContent =
+          "ابتدا باید شماره موبایل خود را تأیید کنید.";
+
+        return;
+
+      }
+
+      submitButton.disabled = true;
+
+      message.textContent = "در حال ارسال اطلاعات ثبت‌نام...";
+
+      try {
+
+        const result = await sendRequest({
+
+          action: "register",
+
+          contactName: document.getElementById("contactName").value.trim(),
+
+          phone: phoneInput.value.trim(),
+
+          familyMembers: document.getElementById("familyMembers").value.trim(),
+
+          verificationToken: verificationToken
+
+        });
+
+        if (result.success) {
+
+          message.textContent =
+            result.message || "درخواست ثبت‌نام شما با موفقیت ارسال شد.";
+
+          verificationToken = "";
+
+          registrationForm.reset();
+
+          detailsSection.classList.add("hidden");
+
+          phoneSection.classList.remove("hidden");
+
+          phoneInput.value = "";
+
+          sendOtpButton.disabled = false;
+          verifyOtpButton.disabled = false;
+          resendOtpButton.disabled = false;
+
+        } else {
+
+          message.textContent =
+            result.message || "ثبت‌نام انجام نشد. لطفاً دوباره تلاش کنید.";
 
         }
 

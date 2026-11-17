@@ -543,6 +543,61 @@
       }
 
     });
+    
+// ==========================================================
+// QR RETRIEVAL - SEND OTP
+// ==========================================================
+
+const qrPhoneInput = document.getElementById("qrPhone");
+const qrOtpInput = document.getElementById("qrOtp");
+
+const qrPhoneSection = document.getElementById("qrPhoneSection");
+const qrOtpSection = document.getElementById("qrOtpSection");
+
+const qrResultMessage = document.getElementById("qrResultMessage");
+const sendQrOtpButton = document.getElementById("sendQrOtpButton");
+
+let qrVerificationToken = "";
+
+sendQrOtpButton.addEventListener("click", async function () {
+
+  const phone = qrPhoneInput.value.trim();
+
+  if (!phone) {
+    qrResultMessage.textContent = "لطفاً شماره موبایل خود را وارد کنید.";
+    return;
+  }
+
+  sendQrOtpButton.disabled = true;
+  qrResultMessage.textContent = "در حال ارسال کد تأیید...";
+
+  try {
+
+    const response = await sendRequest({
+      action: "sendQrOtp",
+      phone: phone
+    });
+
+    if (!response.success) {
+      qrResultMessage.textContent = response.message;
+      sendQrOtpButton.disabled = false;
+      return;
+    }
+
+    qrPhoneSection.style.display = "none";
+    qrOtpSection.style.display = "block";
+
+    qrResultMessage.textContent = response.message;
+
+  } catch (error) {
+
+    qrResultMessage.textContent = "خطا در ارتباط با سرور. دوباره تلاش کنید.";
+    sendQrOtpButton.disabled = false;
+
+  }
+
+});
+
 
   </script>
 

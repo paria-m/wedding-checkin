@@ -237,13 +237,13 @@
 
     <div id="qrOtpSection" class="hidden">
 
-      <label for="qrOtp">کد تأیید پیامک‌شده</label>
+      <label for="qrOtp">کد تأیید پیامک‌ شده</label>
 
       <input
         type="text"
         id="qrOtp"
         class="otp-input"
-        placeholder="کد ۶ رقمی"
+        placeholder="کد شش‌رقمی"
         inputmode="numeric"
         maxlength="6"
       >
@@ -741,7 +741,7 @@
         qrPdfSection.classList.remove("hidden");
 
         qrResultMessage.textContent =
-          "شماره موبایل با موفقیت تأیید شد. اکنون می‌توانید کدهای QR خانواده را دریافت کنید.";
+          "شماره موبایل با موفقیت تأیید شد. اکنون میتوانیدQR Code خانواده خود را دریافت و خیره کنید. ";
 
       } catch (error) {
 
@@ -1079,7 +1079,7 @@
         await buildFamilyQrPdf(familyQrGuests, printWindow);
 
         qrResultMessage.textContent =
-          "فایل آماده است. ذخیره کنبد و هنگام ورود این ♡QR Code  ها در دسترستان باشد. باسپاس  .";
+          "فایل آماده است. ذخیره کنبد و هنگام ورود این QR Code  ♡ها در دسترستان باشد. باسپاس  .";
 
       } catch (error) {
 

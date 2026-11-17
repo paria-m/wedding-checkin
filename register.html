@@ -597,8 +597,123 @@ sendQrOtpButton.addEventListener("click", async function () {
   }
 
 });
+    
+const verifyQrOtpButton = document.getElementById("verifyQrOtpButton");
+const qrPdfSection = document.getElementById("qrPdfSection");
 
+verifyQrOtpButton.addEventListener("click", async function () {
 
+  const phone = qrPhoneInput.value.trim();
+  const otp = qrOtpInput.value.trim();
+
+  if (!/^\d{6}$/.test(otp)) {
+    qrResultMessage.textContent = "لطفاً کد تأیید ۶ رقمی را وارد کنید.";
+    return;
+  }
+
+  verifyQrOtpButton.disabled = true;
+  qrResultMessage.textContent = "در حال بررسی کد تأیید...";
+
+  try {
+
+    const response = await sendRequest({
+      action: "verifyQrOtp",
+      phone: phone,
+      otp: otp
+    });
+
+    if (!response.success) {
+      qrResultMessage.textContent = response.message;
+      verifyQrOtpButton.disabled = false;
+      return;
+    }
+
+    qrVerificationToken = response.verificationToken;
+
+    qrOtpSection.style.display = "none";
+    qrPdfSection.style.display = "block";
+
+    qrResultMessage.textContent =
+      "شماره موبایل با موفقیت تأیید شد. اکنون می‌توانید کدهای QR خانواده را دریافت کنید.";
+
+  } catch (error) {
+
+    qrResultMessage.textContent =
+      "خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.";
+
+    verifyQrOtpButton.disabled = false;
+
+  }
+
+});
+    
+// ==========================================================
+// QR RETRIEVAL - GET FAMILY QR DATA
+// ==========================================================
+
+let familyQrGuests = [];
+
+const downloadFamilyQrButton = document.getElementById(
+  "downloadFamilyQrButton"
+);
+
+downloadFamilyQrButton.addEventListener("click", async function () {
+
+  const phone = qrPhoneInput.value.trim();
+
+  if (!qrVerificationToken) {
+    qrResultMessage.textContent =
+      "لطفاً ابتدا شماره موبایل خود را تأیید کنید.";
+    return;
+  }
+
+  downloadFamilyQrButton.disabled = true;
+  qrResultMessage.textContent =
+    "در حال دریافت اطلاعات QR اعضای خانواده...";
+
+  try {
+
+    const response = await sendRequest({
+      action: "getFamilyQrData",
+      phone: phone,
+      verificationToken: qrVerificationToken
+    });
+
+    if (!response.success) {
+      qrResultMessage.textContent = response.message;
+      downloadFamilyQrButton.disabled = false;
+      return;
+    }
+
+    if (!response.guests || response.guests.length === 0) {
+      qrResultMessage.textContent =
+        response.message || "کد QR برای این خانواده پیدا نشد.";
+
+      downloadFamilyQrButton.disabled = false;
+      return;
+    }
+
+    familyQrGuests = response.guests;
+
+    // The verification token has been consumed by the server.
+    qrVerificationToken = "";
+
+    qrResultMessage.textContent =
+      "اطلاعات " + familyQrGuests.length +
+      " عضو خانواده با موفقیت دریافت شد.";
+
+    // PDF generation will be added in the next step.
+
+  } catch (error) {
+
+    qrResultMessage.textContent =
+      "خطا در دریافت اطلاعات. لطفاً دوباره تلاش کنید.";
+
+    downloadFamilyQrButton.disabled = false;
+
+  }
+
+});
   </script>
 
 </body>

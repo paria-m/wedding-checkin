@@ -190,7 +190,7 @@
         inputmode="numeric"
         autocomplete="one-time-code"
         maxlength="6"
-        placeholder="با اعداد انگلیسی - کد شش‌رقمی"
+        placeholder="کد شش‌رقمی"
       >
 
       <button type="button" id="verifyOtpButton">
@@ -243,7 +243,7 @@
         type="text"
         id="qrOtp"
         class="otp-input"
-        placeholder="با اعداد انگلیسی - کد شش‌رقمی"
+        placeholder="کد ۶ رقمی"
         inputmode="numeric"
         maxlength="6"
       >
@@ -741,7 +741,8 @@
         qrPdfSection.classList.remove("hidden");
 
         qrResultMessage.textContent =
-          "شماره موبایل با موفقیت تأیید شد. اکنون میتوانید QR code های خود را برای ورود به مراسم دریافت کنید. یادتون نره ذخیرشون کنید;)
+          "شماره موبایل با موفقیت تأیید شد. اکنون می‌توانید کدهای QR خانواده را دریافت کنید.";
+
       } catch (error) {
 
         console.error("QR verify OTP error:", error);
@@ -1078,7 +1079,7 @@
         await buildFamilyQrPdf(familyQrGuests, printWindow);
 
         qrResultMessage.textContent =
-          "فایل آماده است. ذخیره کنبد و هنگام ورود این QR Code  ♡ها در دسترستان باشد. باسپاس  .";
+          "فایل آماده است. ذخیره کنبد و هنگام ورود این ♡QR Code  ها در دسترستان باشد. باسپاس  .";
 
       } catch (error) {
 

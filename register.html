@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>ثبت‌نام مهمانان مراسم</title>
+  <title>ثبت‌نام و دریافت QR مهمانان</title>
 
   <style>
     * {
@@ -28,12 +28,20 @@
       padding: 25px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      margin-bottom: 22px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #7b3f54;
     }
 
     h1 {
-      text-align: center;
-      color: #7b3f54;
       font-size: 25px;
+    }
+
+    h2 {
+      font-size: 21px;
     }
 
     p {
@@ -46,8 +54,7 @@
       font-weight: bold;
     }
 
-    input,
-    textarea {
+    input, textarea {
       width: 100%;
       padding: 12px;
       margin-top: 7px;
@@ -99,7 +106,7 @@
       color: #555;
     }
 
-    #message {
+    .message {
       margin-top: 18px;
       text-align: center;
       font-weight: bold;
@@ -125,55 +132,75 @@
       }
     }
   </style>
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 </head>
 
 <body>
 
+  <!-- QR RETRIEVAL SECTION -->
+
   <div id="qrRetrievalSection" class="container">
-  <h2>دریافت کدهای QR خانوادگی</h2>
-  <p>اگر قبلاً ثبت‌نام شما تأیید شده است، می‌توانید کدهای QR اعضای خانواده را دریافت کنید.</p>
 
-  <div id="qrPhoneSection">
-    <label for="qrPhone">شماره موبایل ثبت‌شده</label>
-    <input
-      type="tel"
-      id="qrPhone"
-      placeholder="مثلاً 09123456789"
-      inputmode="numeric"
-    >
-    <button type="button" id="sendQrOtpButton">
-      دریافت کد تأیید
-    </button>
+    <h2>دریافت کدهای QR خانوادگی</h2>
+
+    <p>
+      اگر قبلاً ثبت‌نام شما تأیید شده است،
+      می‌توانید کدهای QR اعضای خانواده را دریافت کنید.
+    </p>
+
+    <div id="qrPhoneSection">
+
+      <label for="qrPhone">شماره موبایل ثبت‌شده</label>
+
+      <input
+        type="tel"
+        id="qrPhone"
+        placeholder="مثلاً 09123456789"
+        inputmode="numeric"
+      >
+
+      <button type="button" id="sendQrOtpButton">
+        دریافت کد تأیید
+      </button>
+
+    </div>
+
+    <div id="qrOtpSection" class="hidden">
+
+      <label for="qrOtp">کد تأیید پیامک‌شده</label>
+
+      <input
+        type="text"
+        id="qrOtp"
+        class="otp-input"
+        placeholder="کد ۶ رقمی"
+        inputmode="numeric"
+        maxlength="6"
+      >
+
+      <button type="button" id="verifyQrOtpButton">
+        تأیید کد
+      </button>
+
+    </div>
+
+    <div id="qrResultMessage" class="message"
+         role="status" aria-live="polite"></div>
+
+    <div id="qrPdfSection" class="hidden">
+
+      <button type="button" id="downloadFamilyQrButton">
+        دریافت فایل PDF کدهای QR خانواده
+      </button>
+
+    </div>
+
   </div>
 
-  <div id="qrOtpSection" style="display:none;">
-    <label for="qrOtp">کد تأیید پیامک‌شده</label>
-    <input
-      type="text"
-      id="qrOtp"
-      placeholder="کد ۶ رقمی"
-      inputmode="numeric"
-      maxlength="6"
-    >
-    <button type="button" id="verifyQrOtpButton">
-      تأیید کد
-    </button>
-  </div>
 
-  <div id="qrResultMessage"></div>
-
-  <div id="qrPdfSection" style="display:none;">
-    <button type="button" id="downloadFamilyQrButton">
-      دریافت فایل PDF کدهای QR خانواده
-    </button>
-  </div>
-</div>
+  <!-- REGISTRATION SECTION -->
 
   <div class="container">
 
@@ -203,6 +230,7 @@
       </button>
 
     </div>
+
 
     <!-- STEP 2: OTP VERIFICATION -->
 
@@ -238,6 +266,7 @@
       </button>
 
     </div>
+
 
     <!-- STEP 3: REGISTRATION DETAILS -->
 
@@ -283,14 +312,46 @@
 
     </div>
 
-    <p id="message" role="status" aria-live="polite"></p>
+    <p id="message" class="message"
+       role="status" aria-live="polite"></p>
 
   </div>
 
+
   <script>
+
+    // ==========================================================
+    // CONFIGURATION
+    // ==========================================================
 
     const SCRIPT_URL =
       "https://script.google.com/macros/s/AKfycbxABUJIOwW3obUMnTfzoWzFlX9JslMLwZIrt15MqYABxDisIRN1WEwYpIkiCH4V-Vlo/exec";
+
+
+    // ==========================================================
+    // COMMON REQUEST FUNCTION
+    // ==========================================================
+
+    async function sendRequest(data) {
+
+      const formData = new URLSearchParams();
+
+      Object.keys(data).forEach(function(key) {
+        formData.append(key, data[key]);
+      });
+
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: formData
+      });
+
+      return await response.json();
+    }
+
+
+    // ==========================================================
+    // REGISTRATION ELEMENTS
+    // ==========================================================
 
     const phoneInput = document.getElementById("phone");
     const otpInput = document.getElementById("otp");
@@ -309,27 +370,13 @@
 
     const message = document.getElementById("message");
 
-    // This token exists only in the current page session.
     let verificationToken = "";
 
-    // Send a request to Google Apps Script.
-    async function sendRequest(data) {
 
-      const formData = new URLSearchParams();
+    // ==========================================================
+    // REGISTRATION - SEND OTP
+    // ==========================================================
 
-      Object.keys(data).forEach(function(key) {
-        formData.append(key, data[key]);
-      });
-
-      const response = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: formData
-      });
-
-      return await response.json();
-    }
-
-    // STEP 1: Send OTP.
     async function sendOtp() {
 
       const phone = phoneInput.value.trim();
@@ -351,19 +398,19 @@
           phone: phone
         });
 
-       if (result.success) {
+        if (result.success) {
 
           phoneSection.classList.add("hidden");
           otpSection.classList.remove("hidden");
-        
+
           otpInput.value = "";
-        
+
           verifyOtpButton.disabled = false;
           resendOtpButton.disabled = false;
-        
+
           message.textContent =
             result.message || "کد تأیید ارسال شد. لطفاً آن را وارد کنید.";
-        
+
           otpInput.focus();
 
         } else {
@@ -390,7 +437,11 @@
 
     }
 
-    // STEP 2: Verify OTP.
+
+    // ==========================================================
+    // REGISTRATION - VERIFY OTP
+    // ==========================================================
+
     async function verifyOtp() {
 
       const phone = phoneInput.value.trim();
@@ -446,14 +497,20 @@
 
     }
 
-    // Resend OTP.
+
+    // REGISTRATION BUTTON EVENTS
+
     sendOtpButton.addEventListener("click", sendOtp);
+
     resendOtpButton.addEventListener("click", sendOtp);
 
-    // Verify OTP.
     verifyOtpButton.addEventListener("click", verifyOtp);
 
-    // Change phone number.
+
+    // ==========================================================
+    // REGISTRATION - CHANGE PHONE
+    // ==========================================================
+
     changePhoneButton.addEventListener("click", function() {
 
       verificationToken = "";
@@ -475,7 +532,11 @@
 
     });
 
-    // STEP 3: Submit final registration.
+
+    // ==========================================================
+    // REGISTRATION - SUBMIT
+    // ==========================================================
+
     registrationForm.addEventListener("submit", async function(event) {
 
       event.preventDefault();
@@ -549,177 +610,491 @@
       }
 
     });
-    
-// ==========================================================
-// QR RETRIEVAL - SEND OTP
-// ==========================================================
 
-const qrPhoneInput = document.getElementById("qrPhone");
-const qrOtpInput = document.getElementById("qrOtp");
 
-const qrPhoneSection = document.getElementById("qrPhoneSection");
-const qrOtpSection = document.getElementById("qrOtpSection");
+    // ==========================================================
+    // QR RETRIEVAL ELEMENTS
+    // ==========================================================
 
-const qrResultMessage = document.getElementById("qrResultMessage");
-const sendQrOtpButton = document.getElementById("sendQrOtpButton");
+    const qrPhoneInput = document.getElementById("qrPhone");
+    const qrOtpInput = document.getElementById("qrOtp");
 
-let qrVerificationToken = "";
+    const qrPhoneSection = document.getElementById("qrPhoneSection");
+    const qrOtpSection = document.getElementById("qrOtpSection");
+    const qrPdfSection = document.getElementById("qrPdfSection");
 
-sendQrOtpButton.addEventListener("click", async function () {
+    const qrResultMessage = document.getElementById("qrResultMessage");
 
-  const phone = qrPhoneInput.value.trim();
+    const sendQrOtpButton = document.getElementById("sendQrOtpButton");
+    const verifyQrOtpButton = document.getElementById("verifyQrOtpButton");
+    const downloadFamilyQrButton =
+      document.getElementById("downloadFamilyQrButton");
 
-  if (!phone) {
-    qrResultMessage.textContent = "لطفاً شماره موبایل خود را وارد کنید.";
-    return;
-  }
+    let qrVerificationToken = "";
+    let familyQrGuests = [];
 
-  sendQrOtpButton.disabled = true;
-  qrResultMessage.textContent = "در حال ارسال کد تأیید...";
 
-  try {
+    // ==========================================================
+    // QR RETRIEVAL - SEND OTP
+    // ==========================================================
 
-    const response = await sendRequest({
-      action: "sendQrOtp",
-      phone: phone
-    });
+    sendQrOtpButton.addEventListener("click", async function() {
 
-    if (!response.success) {
-      qrResultMessage.textContent = response.message;
-      sendQrOtpButton.disabled = false;
-      return;
-    }
+      const phone = qrPhoneInput.value.trim();
 
-    qrPhoneSection.style.display = "none";
-    qrOtpSection.style.display = "block";
+      if (!phone) {
+        qrResultMessage.textContent =
+          "لطفاً شماره موبایل خود را وارد کنید.";
+        return;
+      }
 
-    qrResultMessage.textContent = response.message;
+      sendQrOtpButton.disabled = true;
 
-  } catch (error) {
-
-    qrResultMessage.textContent = "خطا در ارتباط با سرور. دوباره تلاش کنید.";
-    sendQrOtpButton.disabled = false;
-
-  }
-
-});
-    
-const verifyQrOtpButton = document.getElementById("verifyQrOtpButton");
-const qrPdfSection = document.getElementById("qrPdfSection");
-
-verifyQrOtpButton.addEventListener("click", async function () {
-
-  const phone = qrPhoneInput.value.trim();
-  const otp = qrOtpInput.value.trim();
-
-  if (!/^\d{6}$/.test(otp)) {
-    qrResultMessage.textContent = "لطفاً کد تأیید ۶ رقمی را وارد کنید.";
-    return;
-  }
-
-  verifyQrOtpButton.disabled = true;
-  qrResultMessage.textContent = "در حال بررسی کد تأیید...";
-
-  try {
-
-    const response = await sendRequest({
-      action: "verifyQrOtp",
-      phone: phone,
-      otp: otp
-    });
-
-    if (!response.success) {
-      qrResultMessage.textContent = response.message;
-      verifyQrOtpButton.disabled = false;
-      return;
-    }
-
-    qrVerificationToken = response.verificationToken;
-
-    qrOtpSection.style.display = "none";
-    qrPdfSection.style.display = "block";
-
-    qrResultMessage.textContent =
-      "شماره موبایل با موفقیت تأیید شد. اکنون می‌توانید کدهای QR خانواده را دریافت کنید.";
-
-  } catch (error) {
-
-    qrResultMessage.textContent =
-      "خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.";
-
-    verifyQrOtpButton.disabled = false;
-
-  }
-
-});
-    
-// ==========================================================
-// QR RETRIEVAL - GET FAMILY QR DATA
-// ==========================================================
-
-let familyQrGuests = [];
-
-const downloadFamilyQrButton = document.getElementById(
-  "downloadFamilyQrButton"
-);
-
-downloadFamilyQrButton.addEventListener("click", async function () {
-
-  const phone = qrPhoneInput.value.trim();
-
-  if (!qrVerificationToken) {
-    qrResultMessage.textContent =
-      "لطفاً ابتدا شماره موبایل خود را تأیید کنید.";
-    return;
-  }
-
-  downloadFamilyQrButton.disabled = true;
-  qrResultMessage.textContent =
-    "در حال دریافت اطلاعات QR اعضای خانواده...";
-
-  try {
-
-    const response = await sendRequest({
-      action: "getFamilyQrData",
-      phone: phone,
-      verificationToken: qrVerificationToken
-    });
-
-    if (!response.success) {
-      qrResultMessage.textContent = response.message;
-      downloadFamilyQrButton.disabled = false;
-      return;
-    }
-
-    if (!response.guests || response.guests.length === 0) {
       qrResultMessage.textContent =
-        response.message || "کد QR برای این خانواده پیدا نشد.";
+        "در حال ارسال کد تأیید...";
 
-      downloadFamilyQrButton.disabled = false;
-      return;
+      try {
+
+        const response = await sendRequest({
+          action: "sendQrOtp",
+          phone: phone
+        });
+
+        if (!response.success) {
+
+          qrResultMessage.textContent = response.message;
+
+          sendQrOtpButton.disabled = false;
+
+          return;
+
+        }
+
+        qrPhoneSection.classList.add("hidden");
+        qrOtpSection.classList.remove("hidden");
+
+        qrResultMessage.textContent = response.message;
+
+        qrOtpInput.focus();
+
+      } catch (error) {
+
+        console.error("QR send OTP error:", error);
+
+        qrResultMessage.textContent =
+          "خطا در ارتباط با سرور. دوباره تلاش کنید.";
+
+        sendQrOtpButton.disabled = false;
+
+      }
+
+    });
+
+
+    // ==========================================================
+    // QR RETRIEVAL - VERIFY OTP
+    // ==========================================================
+
+    verifyQrOtpButton.addEventListener("click", async function() {
+
+      const phone = qrPhoneInput.value.trim();
+      const otp = qrOtpInput.value.trim();
+
+      if (!/^[0-9]{6}$/.test(otp)) {
+
+        qrResultMessage.textContent =
+          "لطفاً کد تأیید ۶ رقمی را با اعداد انگلیسی وارد کنید.";
+
+        return;
+
+      }
+
+      verifyQrOtpButton.disabled = true;
+
+      qrResultMessage.textContent =
+        "در حال بررسی کد تأیید...";
+
+      try {
+
+        const response = await sendRequest({
+          action: "verifyQrOtp",
+          phone: phone,
+          otp: otp
+        });
+
+        if (!response.success || !response.verificationToken) {
+
+          qrResultMessage.textContent = response.message;
+
+          verifyQrOtpButton.disabled = false;
+
+          return;
+
+        }
+
+        qrVerificationToken = response.verificationToken;
+
+        qrOtpSection.classList.add("hidden");
+        qrPdfSection.classList.remove("hidden");
+
+        qrResultMessage.textContent =
+          "شماره موبایل با موفقیت تأیید شد. اکنون می‌توانید کدهای QR خانواده را دریافت کنید.";
+
+      } catch (error) {
+
+        console.error("QR verify OTP error:", error);
+
+        qrResultMessage.textContent =
+          "خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.";
+
+        verifyQrOtpButton.disabled = false;
+
+      }
+
+    });
+
+
+    // ==========================================================
+    // HELPER - ESCAPE HTML
+    // ==========================================================
+
+    function escapeHtml(value) {
+
+      return String(value).replace(/[&<>"']/g, function(character) {
+
+        const entities = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        };
+
+        return entities[character];
+
+      });
+
     }
 
-    familyQrGuests = response.guests;
 
-    // The verification token has been consumed by the server.
-    qrVerificationToken = "";
+    // ==========================================================
+    // HELPER - GENERATE QR IMAGE
+    // ==========================================================
 
-    qrResultMessage.textContent =
-      "اطلاعات " + familyQrGuests.length +
-      " عضو خانواده با موفقیت دریافت شد.";
+    function generateQrImage(token) {
 
-    // PDF generation will be added in the next step.
+      return new Promise(function(resolve, reject) {
 
-  } catch (error) {
+        try {
 
-    qrResultMessage.textContent =
-      "خطا در دریافت اطلاعات. لطفاً دوباره تلاش کنید.";
+          const tempDiv = document.createElement("div");
 
-    downloadFamilyQrButton.disabled = false;
+          new QRCode(tempDiv, {
+            text: token,
+            width: 500,
+            height: 500,
+            correctLevel: QRCode.CorrectLevel.H
+          });
 
-  }
+          const canvas = tempDiv.querySelector("canvas");
 
-});
+          if (canvas) {
+            resolve(canvas.toDataURL("image/png"));
+            return;
+          }
+
+          const image = tempDiv.querySelector("img");
+
+          if (image && image.src) {
+            resolve(image.src);
+            return;
+          }
+
+          reject(new Error("QR image generation failed."));
+
+        } catch (error) {
+
+          reject(error);
+
+        }
+
+      });
+
+    }
+
+
+    // ==========================================================
+    // QR RETRIEVAL - BUILD PRINTABLE FAMILY PDF
+    // ==========================================================
+
+    async function buildFamilyQrPdf(guests, printWindow) {
+
+      const qrCards = [];
+
+      for (const guest of guests) {
+
+        if (!guest.qrToken || !guest.name) {
+          throw new Error("Guest QR data is incomplete.");
+        }
+
+        const qrImage = await generateQrImage(guest.qrToken);
+
+        qrCards.push({
+          name: guest.name,
+          image: qrImage
+        });
+
+      }
+
+      const pages = [];
+
+      for (let i = 0; i < qrCards.length; i += 4) {
+        pages.push(qrCards.slice(i, i + 4));
+      }
+
+      const pagesHtml = pages.map(function(page, pageIndex) {
+
+        const cardsHtml = page.map(function(guest) {
+
+          return `
+            <div class="qr-card">
+
+              <img
+                class="qr-image"
+                src="${guest.image}"
+                alt="QR Code"
+              >
+
+              <div class="guest-name">
+                ${escapeHtml(guest.name)}
+              </div>
+
+            </div>
+          `;
+
+        }).join("");
+
+        return `
+          <section class="pdf-page ${pageIndex === pages.length - 1 ? "last-page" : ""}">
+            ${cardsHtml}
+          </section>
+        `;
+
+      }).join("");
+
+      const printHtml = `
+        <!DOCTYPE html>
+        <html lang="fa" dir="rtl">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+          <title>Family QR Codes</title>
+
+          <style>
+
+            * {
+              box-sizing: border-box;
+            }
+
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
+
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: Tahoma, Arial, sans-serif;
+              direction: rtl;
+            }
+
+            .pdf-page {
+              width: 210mm;
+              height: 297mm;
+              padding: 12mm;
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              grid-template-rows: 1fr 1fr;
+              gap: 8mm;
+              page-break-after: always;
+              break-after: page;
+            }
+
+            .pdf-page.last-page {
+              page-break-after: auto;
+              break-after: auto;
+            }
+
+            .qr-card {
+              border: 1px solid #ddd;
+              border-radius: 5mm;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              overflow: hidden;
+              padding: 8mm;
+              text-align: center;
+            }
+
+            .qr-image {
+              width: 55mm;
+              height: 55mm;
+              object-fit: contain;
+            }
+
+            .guest-name {
+              margin-top: 8mm;
+              font-size: 16pt;
+              font-weight: bold;
+              line-height: 1.8;
+              text-align: center;
+              overflow-wrap: anywhere;
+            }
+
+            @media screen {
+              body {
+                background: #eee;
+              }
+
+              .pdf-page {
+                margin: 10mm auto;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,.15);
+              }
+            }
+
+            @media print {
+
+              body {
+                background: white;
+              }
+
+              .pdf-page {
+                margin: 0;
+                box-shadow: none;
+              }
+
+            }
+
+          </style>
+        </head>
+
+        <body>
+
+          ${pagesHtml}
+
+        </body>
+        </html>
+      `;
+
+      printWindow.document.open();
+      printWindow.document.write(printHtml);
+      printWindow.document.close();
+
+      printWindow.onload = function() {
+
+        setTimeout(function() {
+          printWindow.focus();
+          printWindow.print();
+        }, 500);
+
+      };
+
+    }
+
+
+    // ==========================================================
+    // QR RETRIEVAL - GET DATA AND CREATE PDF
+    // ==========================================================
+
+    downloadFamilyQrButton.addEventListener("click", async function() {
+
+      // Open the print window immediately to avoid popup blocking.
+      const printWindow = window.open("", "_blank");
+
+      if (!printWindow) {
+
+        qrResultMessage.textContent =
+          "مرورگر پنجره جدید را مسدود کرده است. لطفاً اجازه بازشدن پنجره جدید را بدهید.";
+
+        return;
+
+      }
+
+      downloadFamilyQrButton.disabled = true;
+
+      try {
+
+        // Retrieve guest data only once.
+        if (familyQrGuests.length === 0) {
+
+          if (!qrVerificationToken) {
+
+            throw new Error(
+              "تأیید شماره معتبر نیست. لطفاً دوباره شماره خود را تأیید کنید."
+            );
+
+          }
+
+          qrResultMessage.textContent =
+            "در حال دریافت اطلاعات QR اعضای خانواده...";
+
+          const response = await sendRequest({
+
+            action: "getFamilyQrData",
+
+            phone: qrPhoneInput.value.trim(),
+
+            verificationToken: qrVerificationToken
+
+          });
+
+          if (!response.success) {
+            throw new Error(response.message);
+          }
+
+          if (!response.guests || response.guests.length === 0) {
+            throw new Error(
+              response.message || "کد QR برای این خانواده پیدا نشد."
+            );
+          }
+
+          familyQrGuests = response.guests;
+
+          // Server consumes this token after successful retrieval.
+          qrVerificationToken = "";
+
+        }
+
+        qrResultMessage.textContent =
+          "در حال ساخت فایل PDF برای " +
+          familyQrGuests.length +
+          " نفر...";
+
+        await buildFamilyQrPdf(familyQrGuests, printWindow);
+
+        qrResultMessage.textContent =
+          "فایل آماده است. در پنجره چاپ، گزینه Save as PDF را انتخاب کنید.";
+
+      } catch (error) {
+
+        console.error("Family QR PDF error:", error);
+
+        printWindow.close();
+
+        qrResultMessage.textContent =
+          error.message || "در ساخت فایل PDF خطایی رخ داد.";
+
+      } finally {
+
+        downloadFamilyQrButton.disabled = false;
+
+      }
+
+    });
+
   </script>
 
 </body>

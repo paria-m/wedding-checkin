@@ -139,68 +139,8 @@
 
 <body>
 
-  <!-- QR RETRIEVAL SECTION -->
 
-  <div id="qrRetrievalSection" class="container">
-
-    <h2>دریافت کدهای QR خانوادگی</h2>
-
-    <p>
-      اگر قبلاً ثبت‌نام شما تأیید شده است،
-      می‌توانید کدهای QR اعضای خانواده را دریافت کنید.
-    </p>
-
-    <div id="qrPhoneSection">
-
-      <label for="qrPhone">شماره موبایل ثبت‌شده</label>
-
-      <input
-        type="tel"
-        id="qrPhone"
-        placeholder="مثلاً 09123456789"
-        inputmode="numeric"
-      >
-
-      <button type="button" id="sendQrOtpButton">
-        دریافت کد تأیید
-      </button>
-
-    </div>
-
-    <div id="qrOtpSection" class="hidden">
-
-      <label for="qrOtp">کد تأیید پیامک‌شده</label>
-
-      <input
-        type="text"
-        id="qrOtp"
-        class="otp-input"
-        placeholder="کد ۶ رقمی"
-        inputmode="numeric"
-        maxlength="6"
-      >
-
-      <button type="button" id="verifyQrOtpButton">
-        تأیید کد
-      </button>
-
-    </div>
-
-    <div id="qrResultMessage" class="message"
-         role="status" aria-live="polite"></div>
-
-    <div id="qrPdfSection" class="hidden">
-
-      <button type="button" id="downloadFamilyQrButton">
-        دریافت فایل PDF کدهای QR خانواده
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- REGISTRATION SECTION -->
+   <!-- REGISTRATION SECTION -->
 
   <div class="container">
 
@@ -266,6 +206,69 @@
       </button>
 
     </div>
+
+  <!-- QR RETRIEVAL SECTION -->
+
+  <div id="qrRetrievalSection" class="container">
+
+    <h2>دریافت کدهای QR خانوادگی</h2>
+
+    <p>
+      اگر قبلاً ثبت‌نام شما تأیید شده است،
+      می‌توانید کدهای QR اعضای خانواده را دریافت کنید.
+    </p>
+
+    <div id="qrPhoneSection">
+
+      <label for="qrPhone">شماره موبایل ثبت‌شده</label>
+
+      <input
+        type="tel"
+        id="qrPhone"
+        placeholder="مثلاً 09123456789"
+        inputmode="numeric"
+      >
+
+      <button type="button" id="sendQrOtpButton">
+        دریافت کد تأیید
+      </button>
+
+    </div>
+
+    <div id="qrOtpSection" class="hidden">
+
+      <label for="qrOtp">کد تأیید پیامک‌شده</label>
+
+      <input
+        type="text"
+        id="qrOtp"
+        class="otp-input"
+        placeholder="کد ۶ رقمی"
+        inputmode="numeric"
+        maxlength="6"
+      >
+
+      <button type="button" id="verifyQrOtpButton">
+        تأیید کد
+      </button>
+
+    </div>
+
+    <div id="qrResultMessage" class="message"
+         role="status" aria-live="polite"></div>
+
+    <div id="qrPdfSection" class="hidden">
+
+      <button type="button" id="downloadFamilyQrButton">
+        دریافت فایل PDF کدهای QR خانواده
+      </button>
+
+    </div>
+
+  </div>
+
+
+ 
 
 
     <!-- STEP 3: REGISTRATION DETAILS -->
